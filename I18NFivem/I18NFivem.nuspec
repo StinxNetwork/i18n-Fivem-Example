@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>1.0.0</version>
+    <title>i18n-Fivem</title>
+    <authors>Muulfz Stinx</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/StinxVGames/i18n-Fivem</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/assets/vue-i18n-logo.png?sanitize=false</iconUrl>
+    <description>A Simple I18N for Fivem</description>
+    <releaseNotes>Implementation.</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>i18n Fivem</tags>
+  </metadata>
+</package>
