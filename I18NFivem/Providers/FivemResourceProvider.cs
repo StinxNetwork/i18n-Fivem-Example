@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using CitizenFX.Core;
     using CitizenFX.Core.Native;
     using Contracts;
 
@@ -22,16 +21,19 @@
             _knownFileExtensions = knownFileExtensions;
         }
 
-        public IEnumerable<Tuple<string, string>> GetAvailableLocales() => _locales.Select(x =>
+        public IEnumerable<Tuple<string, string>> GetAvailableLocales()
         {
-            var extension = x.Value.Substring(x.Value.LastIndexOf('.'));
-            return new Tuple<string, string>(x.Key, extension);
-        });
+            return _locales.Select(x =>
+{
+    string extension = x.Value.Substring(x.Value.LastIndexOf('.'));
+    return new Tuple<string, string>(x.Key, extension);
+});
+        }
 
         public string GetLocaleFileString(string locale)
         {
             string resourcePath = _locales[locale];
-            
+
             return API.LoadResourceFile(_resourceName, $"{_folder}/{resourcePath}");
         }
 
@@ -93,7 +95,7 @@
                     }
                 }
             }
-            
+
             if (supportedLocaleAndExtensions.Count == 0)
             {
                 throw new I18NException("No locales have been found. Make sure you've got a folder " +
@@ -103,15 +105,15 @@
             }
 
 
-            foreach (var localeAndExtension in supportedLocaleAndExtensions)
+            foreach (KeyValuePair<string, string> localeAndExtension in supportedLocaleAndExtensions)
             {
-                var localeName = localeAndExtension.Key;
+                string localeName = localeAndExtension.Key;
 
                 if (_locales.ContainsKey(localeName))
                 {
                     throw new I18NException($"The locales folder '{_folder}' contains a duplicated locale '{localeName}'");
                 }
-                
+
                 _locales.Add(localeName, localeAndExtension.Value);
             }
 
@@ -130,7 +132,7 @@
             {
                 return false;
             }
-            
+
             return true;
         }
 

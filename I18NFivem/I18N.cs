@@ -24,13 +24,16 @@
 
         private readonly IList<Tuple<ILocaleReader, string>> _readers = new List<Tuple<ILocaleReader, string>>();
         private readonly IList<ILocaleProvider> _providers = new List<ILocaleProvider>();
+        private GtaLanguages ActiveGtaLanguage = (GtaLanguages)API.GetCurrentLanguage();
 
         public static I18N Current { get; set; } = new I18N();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(string info) =>
+        private void NotifyPropertyChanged(string info)
+        {
             PropertyChanged?.DynamicInvoke(this, new PropertyChangedEventArgs(info));
+        }
 
 
         /// <summary>
@@ -78,10 +81,10 @@
         }
 
         public List<Language> Languages => _locales?.Select(x => new Language
-            {
-                Locale = x,
-                DisplayName = TranslateOrNull(x) ?? new CultureInfo(x).NativeName.CapitalizeFirstCharacter()
-            })
+        {
+            Locale = x,
+            DisplayName = TranslateOrNull(x) ?? new CultureInfo(x).NativeName.CapitalizeFirstCharacter()
+        })
             .ToList();
 
         /// <summary>
@@ -172,7 +175,7 @@
         {
             IEnumerable<string> knowFileExtensions = _readers.Select(x => x.Item2);
 
-            foreach (var provider in _providers)
+            foreach (ILocaleProvider provider in _providers)
             {
                 provider.Dispose();
             }
@@ -181,8 +184,8 @@
 
             if (_providers.FirstOrDefault(x => x is FivemResourceProvider) == null)
             {
-                var resourcesFolder = _resourcesFolder ?? "Locales";
-                var defaultProvider = new FivemResourceProvider(resourceName, resourcesFolder, knowFileExtensions)
+                string resourcesFolder = _resourcesFolder ?? "Locales";
+                ILocaleProvider defaultProvider = new FivemResourceProvider(resourceName, resourcesFolder, knowFileExtensions)
                     .SetLogger(Log)
                     .Init();
 
@@ -193,6 +196,18 @@
             _locales = localeTuples.Select(x => x.Item1).ToList();
             _localeFileExtensionMap = localeTuples.ToDictionary(x => x.Item1, x => x.Item2);
 
+            string location = GetLocationAndLoad();
+
+            Log($"{location} was loaded");
+
+            NotifyPropertyChanged(nameof(Locale));
+            NotifyPropertyChanged(nameof(Language));
+
+            return this;
+        }
+
+        private string GetLocationAndLoad()
+        {
             string localeToLoad = GetDefaultLocale();
 
             if (string.IsNullOrEmpty(localeToLoad))
@@ -213,17 +228,14 @@
                 Log($"Default locale from current culture: {localeToLoad}");
             }
 
-
             LoadLocale(localeToLoad);
 
-            NotifyPropertyChanged(nameof(Locale));
-            NotifyPropertyChanged(nameof(Language));
-
-            return this;
+            return localeToLoad;
         }
 
         private void LoadLocale(string locale)
         {
+            Debug.WriteLine(locale);
             if (!_locales.Contains(locale))
             {
                 throw new I18NException($"Locale '{locale}' is not available", new KeyNotFoundException());
@@ -242,7 +254,7 @@
             }
             catch (Exception e)
             {
-                var message =
+                string message =
                     $"{ErrorMessage.ReaderException}.\nReader: {reader.GetType().Name}.\nLocale: {locale}{extension}";
                 throw new I18NException(message, e);
             }
@@ -258,7 +270,7 @@
 
         public string GetDefaultLocale()
         {
-            GtaLanguages currentLanguage = (GtaLanguages) API.GetCurrentLanguage();
+            GtaLanguages currentLanguage = (GtaLanguages)API.GetCurrentLanguage();
             string enumDescription = currentLanguage.GetEnumDescription();
 
             FivemCultureInfo currentCulture = FivemCultureInfo.FivemCultureInfos.First(x =>
@@ -288,6 +300,8 @@
         /// </summary>
         public string Translate(string key, params object[] args)
         {
+            ValidateLocale();
+
             if (_translations.ContainsKey(key))
                 return args.Length == 0
                     ? _translations[key]
@@ -300,27 +314,40 @@
             return $"{_notFoundSymbol}{key}{_notFoundSymbol}";
         }
 
+        private void ValidateLocale()
+        {
+            GtaLanguages currentLanguage = (GtaLanguages)API.GetCurrentLanguage();
+
+            if (ActiveGtaLanguage != currentLanguage)
+            {
+                GetLocationAndLoad();
+                ActiveGtaLanguage = currentLanguage;
+            }
+        }
+
         /// <summary>
         /// Get a translation from a key, formatting the string with the given params, if any. 
         /// It will return null when the translation is not found
         /// </summary>
-        public string TranslateOrNull(string key, params object[] args) =>
-            _translations.ContainsKey(key)
-                ? (args.Length == 0 ? _translations[key] : string.Format(_translations[key], args))
-                : null;
+        public string TranslateOrNull(string key, params object[] args)
+        {
+            return _translations.ContainsKey(key)
+? (args.Length == 0 ? _translations[key] : string.Format(_translations[key], args))
+: null;
+        }
 
         /// <summary>
         /// Convert Enum Type values to a Dictionary&lt;TEnum, string&gt; where the key is the Enum value and the string is the translated value.
         /// </summary>
         public Dictionary<TEnum, string> TranslateEnumToDictionary<TEnum>()
         {
-            var type = typeof(TEnum);
-            var dic = new Dictionary<TEnum, string>();
+            Type type = typeof(TEnum);
+            Dictionary<TEnum, string> dic = new Dictionary<TEnum, string>();
 
-            foreach (var value in Enum.GetValues(type))
+            foreach (object value in Enum.GetValues(type))
             {
-                var name = Enum.GetName(type, value);
-                dic.Add((TEnum) value, Translate($"{type.Name}.{name}"));
+                string name = Enum.GetName(type, value);
+                dic.Add((TEnum)value, Translate($"{type.Name}.{name}"));
             }
 
             return dic;
@@ -332,7 +359,7 @@
         /// </summary>
         public List<string> TranslateEnumToList<TEnum>()
         {
-            var type = typeof(TEnum);
+            Type type = typeof(TEnum);
 
             return (from object value in Enum.GetValues(type)
                     select Enum.GetName(type, value)
@@ -348,13 +375,13 @@
         /// <returns></returns>
         public List<Tuple<TEnum, string>> TranslateEnumToTupleList<TEnum>()
         {
-            var type = typeof(TEnum);
-            var list = new List<Tuple<TEnum, string>>();
+            Type type = typeof(TEnum);
+            List<Tuple<TEnum, string>> list = new List<Tuple<TEnum, string>>();
 
-            foreach (var value in Enum.GetValues(type))
+            foreach (object value in Enum.GetValues(type))
             {
-                var name = Enum.GetName(type, value);
-                var tuple = new Tuple<TEnum, string>((TEnum) value, Translate($"{type.Name}.{name}"));
+                string name = Enum.GetName(type, value);
+                Tuple<TEnum, string> tuple = new Tuple<TEnum, string>((TEnum)value, Translate($"{type.Name}.{name}"));
                 list.Add(tuple);
             }
 
@@ -365,9 +392,9 @@
         {
             if (PropertyChanged != null)
             {
-                foreach (var @delegate in PropertyChanged.GetInvocationList())
+                foreach (Delegate @delegate in PropertyChanged.GetInvocationList())
                 {
-                    PropertyChanged -= (PropertyChangedEventHandler) @delegate;
+                    PropertyChanged -= (PropertyChangedEventHandler)@delegate;
                 }
 
                 PropertyChanged = null;
@@ -390,7 +417,7 @@
         private void LogTranslations()
         {
             Log("========== I18N Fivem translations ==========");
-            foreach (var item in _translations)
+            foreach (KeyValuePair<string, string> item in _translations)
             {
                 Log($"{item.Key} = {item.Value}");
             }
@@ -399,6 +426,8 @@
         }
 
         private void Log(string trace)
-            => _logger?.DynamicInvoke($"[{nameof(I18N)}] {trace}");
+        {
+            _logger?.DynamicInvoke($"[{nameof(I18N)}] {trace}");
+        }
     }
 }

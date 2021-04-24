@@ -4,6 +4,9 @@
     {
         public string Locale { get; set; }
         public string DisplayName { get; set; }
-        public override string ToString() => DisplayName;
+        public override string ToString()
+        {
+            return DisplayName;
+        }
     }
 }

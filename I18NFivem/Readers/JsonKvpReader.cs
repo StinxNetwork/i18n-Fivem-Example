@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using CitizenFX.Core;
     using Contracts;
     using Newtonsoft.Json;
 

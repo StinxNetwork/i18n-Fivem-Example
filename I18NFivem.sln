@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.31105.61
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18NFivem", "I18NFivem\I18NFivem.csproj", "{3FB54945-1706-446E-B9CC-7903A09C8906}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DBBCBD36-76C3-4485-A93E-028FF4E215DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18NFivem.Tests", "I18NFivem.Tests\I18NFivem.Tests.csproj", "{874AA34A-9BAA-4964-A124-AD7C3E8AB79F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{3FB54945-1706-446E-B9CC-7903A09C8906}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FB54945-1706-446E-B9CC-7903A09C8906}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FB54945-1706-446E-B9CC-7903A09C8906}.Release|Any CPU.Build.0 = Release|Any CPU
+		{874AA34A-9BAA-4964-A124-AD7C3E8AB79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{874AA34A-9BAA-4964-A124-AD7C3E8AB79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{874AA34A-9BAA-4964-A124-AD7C3E8AB79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{874AA34A-9BAA-4964-A124-AD7C3E8AB79F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{874AA34A-9BAA-4964-A124-AD7C3E8AB79F} = {DBBCBD36-76C3-4485-A93E-028FF4E215DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B224ACD7-03C4-4ECB-BD4D-B0EBADB98725}

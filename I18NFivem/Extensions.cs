@@ -12,14 +12,19 @@
         /// Get a translation from a key, formatting the string with the given params, if any
         /// </summary>
         public static string Translate(this string key, params object[] args)
-            => I18N.Current.Translate(key, args);
+        {
+            return I18N.Current.Translate(key, args);
+        }
 
         /// <summary>
         /// Get a translation from a key, formatting the string with the given params, if any. 
         /// It will return null when the translation is not found
         /// </summary>
         public static string TranslateOrNull(this string key, params object[] args)
-            => I18N.Current.TranslateOrNull(key, args);
+        {
+            return I18N.Current.TranslateOrNull(key, args);
+        }
+
         public static string CapitalizeFirstCharacter(this string s)
         {
             if (string.IsNullOrEmpty(s))
@@ -32,11 +37,13 @@
         }
 
         public static string UnescapeLineBreaks(this string str)
-            => str
-                .Replace("\\r\\n", "\\n")
-                .Replace("\\n", Environment.NewLine)
-                .Replace("\r\n", "\n")
-                .Replace("\n", Environment.NewLine);
+        {
+            return str
+                           .Replace("\\r\\n", "\\n")
+                           .Replace("\\n", Environment.NewLine)
+                           .Replace("\r\n", "\n")
+                           .Replace("\n", Environment.NewLine);
+        }
 
         /// <summary>
         /// Translates an Enum value.
@@ -46,8 +53,8 @@
         /// </summary>
         public static string Translate(this Enum value)
         {
-            var fieldInfo = value.GetType().GetRuntimeField(value.ToString());
-            var fieldName = fieldInfo.FieldType.Name;
+            FieldInfo fieldInfo = value.GetType().GetRuntimeField(value.ToString());
+            string fieldName = fieldInfo.FieldType.Name;
 
             return $"{fieldName}.{value}".Translate();
         }
@@ -62,7 +69,7 @@
             {
                 return attributes.First().Description;
             }
-            
+
             return value.ToString();
         }
     }
